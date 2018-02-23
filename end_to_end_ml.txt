@@ -37,6 +37,7 @@ https://repo.continuum.io/pkgs/main/win-64/qt-5.6.2-vc14h6f8c307_12.tar.bz2
 https://repo.continuum.io/pkgs/main/win-64/scipy-1.0.0-py36h1260518_0.tar.bz2
 https://repo.continuum.io/pkgs/main/win-64/setuptools-38.5.1-py36_0.tar.bz2
 https://repo.continuum.io/pkgs/main/win-64/cryptography-2.1.4-py36he1d7878_0.tar.bz2
+https://repo.continuum.io/pkgs/main/win-64/pandas-0.22.0-py36h6538335_0.tar.bz2
 https://repo.continuum.io/pkgs/main/win-64/pyqt-5.6.0-py36hb5ed885_5.tar.bz2
 https://repo.continuum.io/pkgs/main/win-64/scikit-learn-0.19.1-py36h53aea1b_0.tar.bz2
 https://repo.continuum.io/pkgs/main/win-64/wheel-0.30.0-py36h6c3ec14_1.tar.bz2
