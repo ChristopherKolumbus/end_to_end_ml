@@ -1,8 +1,10 @@
 import os
-import requests
 import shutil
 import tarfile
+
+import requests
 import pandas as pd
+
 
 def main():
     download_root = "https://raw.githubusercontent.com/ageron/handson-ml/master/"
