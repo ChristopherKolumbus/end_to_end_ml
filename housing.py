@@ -2,13 +2,15 @@ import os
 import requests
 import shutil
 import tarfile
-
+import pandas as pd
 
 def main():
     download_root = "https://raw.githubusercontent.com/ageron/handson-ml/master/"
     housing_path = "datasets/housing"
     housing_url = download_root + housing_path + "/housing.tgz"
     fetch_housing_data(housing_url, housing_path)
+    df = load_housing_data(housing_path)
+    print(df.tail())
 
 
 def fetch_housing_data(housing_url, housing_path):
@@ -22,6 +24,11 @@ def fetch_housing_data(housing_url, housing_path):
     housing_tgz = tarfile.open(tgz_path)
     housing_tgz.extractall(path=housing_path)
     housing_tgz.close()
+
+
+def load_housing_data(housing_path):
+    csv_path = os.path.join(housing_path, 'housing.csv')
+    return pd.read_csv(csv_path)
 
 
 if __name__ == '__main__':
