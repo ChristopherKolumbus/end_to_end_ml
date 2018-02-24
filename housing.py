@@ -4,6 +4,7 @@ import tarfile
 
 import requests
 import pandas as pd
+from matplotlib import pyplot as plt
 
 
 def main():
@@ -11,8 +12,9 @@ def main():
     housing_path = "datasets/housing"
     housing_url = download_root + housing_path + "/housing.tgz"
     fetch_housing_data(housing_url, housing_path)
-    df = load_housing_data(housing_path)
-    print(df.tail())
+    housing = load_housing_data(housing_path)
+    housing.hist(bins=50, figsize=(20, 15))
+    plt.show()  
 
 
 def fetch_housing_data(housing_url, housing_path):
