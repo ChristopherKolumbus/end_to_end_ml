@@ -5,6 +5,7 @@ import tarfile
 import requests
 import numpy as np
 import pandas as pd
+from sklearn.model_selection import StratifiedShuffleSplit
 from matplotlib import pyplot as plt
 
 
@@ -14,8 +15,14 @@ def main():
     housing_url = download_root + housing_path + "/housing.tgz"
     fetch_housing_data(housing_url, housing_path)
     housing = load_housing_data(housing_path)
-    train_set, test_set = split_train_test(housing, .2)
-    print(len(test_set), len(train_set))
+    housing['income_cat'] = np.ceil(housing['median_income'] / 1.5)
+    housing['income_cat'].where(housing['income_cat'] < 5, 5.0, inplace=True)
+    split = StratifiedShuffleSplit(n_splits=1, test_size=.2, random_state=42)
+    for train_index, test_index in split.split(housing, housing['income_cat']):
+        strat_train_set = housing.loc[train_index]
+        strat_test_set = housing.loc[test_index]
+    for set_ in (strat_train_set, strat_test_set):
+        set_.drop(['income_cat'], axis=1, inplace=True)
 
 
 def fetch_housing_data(housing_url, housing_path):
