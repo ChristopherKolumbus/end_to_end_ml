@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import StratifiedShuffleSplit
 from matplotlib import pyplot as plt
+from pandas.plotting import scatter_matrix
 
 
 def main():
@@ -17,6 +18,7 @@ def main():
     housing = load_housing_data(housing_path)
     strat_train_set, strat_test_set = split_train_test(housing, .2)
     housing = strat_train_set.copy()
+    plot_scatter_matrix(housing)
 
 
 def fetch_housing_data(housing_url, housing_path):
@@ -60,6 +62,12 @@ def visualize_geographical_data(housing):
 def calc_corr_matrix(housing):
     corr_matrix = housing.corr()
     print(corr_matrix['median_house_value'].sort_values(ascending=False))
+
+
+def plot_scatter_matrix(housing):
+    attributes = ['median_house_value', 'median_income', 'total_rooms', 'housing_median_age']
+    scatter_matrix(housing[attributes], figsize=(12, 8))
+    plt.show()
 
 
 if __name__ == '__main__':
