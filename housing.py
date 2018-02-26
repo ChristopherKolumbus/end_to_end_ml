@@ -15,14 +15,7 @@ def main():
     housing_url = download_root + housing_path + "/housing.tgz"
     fetch_housing_data(housing_url, housing_path)
     housing = load_housing_data(housing_path)
-    housing['income_cat'] = np.ceil(housing['median_income'] / 1.5)
-    housing['income_cat'].where(housing['income_cat'] < 5, 5.0, inplace=True)
-    split = StratifiedShuffleSplit(n_splits=1, test_size=.2, random_state=42)
-    for train_index, test_index in split.split(housing, housing['income_cat']):
-        strat_train_set = housing.loc[train_index]
-        strat_test_set = housing.loc[test_index]
-    for set_ in (strat_train_set, strat_test_set):
-        set_.drop(['income_cat'], axis=1, inplace=True)
+    strat_train_set, strat_test_set = split_train_test(housing, .2)
 
 
 def fetch_housing_data(housing_url, housing_path):
@@ -43,12 +36,16 @@ def load_housing_data(housing_path):
     return pd.read_csv(csv_path)
 
 
-def split_train_test(data, test_ratio):
-    shuffled_indices = np.random.permutation(len(data))
-    test_set_size = int(len(data) * test_ratio)
-    test_indices = shuffled_indices[:test_set_size]
-    train_indices = shuffled_indices[test_set_size:]
-    return data.iloc[train_indices], data.iloc[test_indices]
+def split_train_test(housing, test_ratio):
+    housing['income_cat'] = np.ceil(housing['median_income'] / 1.5)
+    housing['income_cat'].where(housing['income_cat'] < 5, 5.0, inplace=True)
+    split = StratifiedShuffleSplit(n_splits=1, test_size=test_ratio, random_state=42)
+    for train_index, test_index in split.split(housing, housing['income_cat']):
+        strat_train_set = housing.loc[train_index]
+        strat_test_set = housing.loc[test_index]
+    for set_ in (strat_train_set, strat_test_set):
+        set_.drop(['income_cat'], axis=1, inplace=True)
+    return strat_train_set, strat_test_set
 
 
 if __name__ == '__main__':
