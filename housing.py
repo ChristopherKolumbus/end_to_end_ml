@@ -8,6 +8,7 @@ import pandas as pd
 from sklearn.model_selection import StratifiedShuffleSplit
 from matplotlib import pyplot as plt
 from pandas.plotting import scatter_matrix
+from sklearn.preprocessing import Imputer
 
 
 def main():
@@ -15,10 +16,11 @@ def main():
     housing_path = "datasets/housing"
     housing_url = download_root + housing_path + "/housing.tgz"
     fetch_housing_data(housing_url, housing_path)
-    housing = load_housing_data(housing_path)
-    strat_train_set, strat_test_set = split_train_test(housing, .2)
-    housing_predictors = strat_train_set.drop('median_house_value', axis=1)
+    housing_data = load_housing_data(housing_path)
+    strat_train_set, strat_test_set = split_train_test(housing_data, .2)
+    housing = strat_train_set.drop('median_house_value', axis=1)
     housing_labels = strat_train_set['median_house_value'].copy()
+    replace_missing_values(housing)
 
 
 def fetch_housing_data(housing_url, housing_path):
@@ -76,6 +78,15 @@ def plot_scatter_matrix(housing):
     attributes = ['median_house_value', 'median_income', 'total_rooms', 'bedrooms_per_rooms']
     scatter_matrix(housing[attributes], figsize=(12, 8))
     plt.show()
+
+
+def replace_missing_values(housing):
+    imputer = Imputer(strategy='median')
+    housing_num = housing.drop('ocean_proximity', axis=1)
+    imputer.fit(housing_num)
+    X = imputer.transform(housing_num)
+    housing_tr = pd.DataFrame(X, columns=housing_num.columns)
+    return housing_tr
 
 
 if __name__ == '__main__':
