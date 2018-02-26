@@ -9,6 +9,7 @@ from sklearn.model_selection import StratifiedShuffleSplit
 from matplotlib import pyplot as plt
 from pandas.plotting import scatter_matrix
 from sklearn.preprocessing import Imputer
+from sklearn.preprocessing import LabelBinarizer
 
 
 def main():
@@ -16,11 +17,14 @@ def main():
     housing_path = "datasets/housing"
     housing_url = download_root + housing_path + "/housing.tgz"
     fetch_housing_data(housing_url, housing_path)
-    housing_data = load_housing_data(housing_path)
-    strat_train_set, strat_test_set = split_train_test(housing_data, .2)
+    housing = load_housing_data(housing_path)
+    strat_train_set, strat_test_set = split_train_test(housing, .2)
     housing = strat_train_set.drop('median_house_value', axis=1)
     housing_labels = strat_train_set['median_house_value'].copy()
-    replace_missing_values(housing)
+    housing = replace_missing_values(housing)
+    print(housing.head())
+    housing = encode_text_labels(housing)
+    print(housing.head())
 
 
 def fetch_housing_data(housing_url, housing_path):
@@ -85,7 +89,18 @@ def replace_missing_values(housing):
     housing_num = housing.drop('ocean_proximity', axis=1)
     imputer.fit(housing_num)
     X = imputer.transform(housing_num)
-    housing_tr = pd.DataFrame(X, columns=housing_num.columns)
+    housing_tr = pd.DataFrame(X, columns=housing_num.columns, index=housing.index)
+    housing_tr['ocean_proximity'] = housing['ocean_proximity']
+    return housing_tr
+
+
+def encode_text_labels(housing):
+    encoder = LabelBinarizer()
+    housing_cat = housing['ocean_proximity']
+    housing_cat_hot = encoder.fit_transform(housing_cat)
+    df = pd.DataFrame(housing_cat_hot, columns=encoder.classes_, index=housing.index)
+    housing_tr = housing.drop('ocean_proximity', axis=1)
+    housing_tr = pd.concat([housing_tr, df], axis=1)
     return housing_tr
 
 
