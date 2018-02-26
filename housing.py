@@ -10,6 +10,27 @@ from matplotlib import pyplot as plt
 from pandas.plotting import scatter_matrix
 from sklearn.preprocessing import Imputer
 from sklearn.preprocessing import LabelBinarizer
+from sklearn.base import BaseEstimator
+from sklearn.base import TransformerMixin
+
+
+class CustomTransformer(BaseEstimator, TransformerMixin):
+    def __init__(self, add_rooms_per_household=True, add_bedrooms_per_rooms=True, add_population_per_household=True):
+        self.add_rooms_per_household = add_rooms_per_household
+        self.add_bedrooms_per_rooms = add_bedrooms_per_rooms
+        self.add_population_per_household = add_population_per_household
+
+    def fit(self):
+        return self
+
+    def transform(self, housing):
+        if self.add_rooms_per_household:
+            housing['rooms_per_household'] = housing['total_rooms'] / housing['households']
+        if self.add_bedrooms_per_rooms:
+            housing['bedrooms_per_rooms'] = housing['total_bedrooms'] / housing['total_rooms']
+        if self.add_population_per_household:
+            housing['population_per_household'] = housing['population'] / housing['households']
+        return housing
 
 
 def main():
@@ -22,8 +43,10 @@ def main():
     housing = strat_train_set.drop('median_house_value', axis=1)
     housing_labels = strat_train_set['median_house_value'].copy()
     housing = replace_missing_values(housing)
-    print(housing.head())
     housing = encode_text_labels(housing)
+    transformer = CustomTransformer()
+    print(housing.head())
+    housing = transformer.transform(housing)
     print(housing.head())
 
 
