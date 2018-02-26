@@ -16,6 +16,7 @@ def main():
     fetch_housing_data(housing_url, housing_path)
     housing = load_housing_data(housing_path)
     strat_train_set, strat_test_set = split_train_test(housing, .2)
+    housing = strat_train_set.copy()
 
 
 def fetch_housing_data(housing_url, housing_path):
@@ -46,6 +47,14 @@ def split_train_test(housing, test_ratio):
     for set_ in (strat_train_set, strat_test_set):
         set_.drop(['income_cat'], axis=1, inplace=True)
     return strat_train_set, strat_test_set
+
+
+def visualize_geographical_data(housing):
+    housing.plot(kind='scatter', x='longitude', y='latitude', alpha=.4, s=housing['population'] / 100,
+                 label='population',
+                 figsize=(10, 7), c='median_house_value', cmap=plt.get_cmap('jet'), colorbar=True)
+    plt.legend()
+    plt.show()
 
 
 if __name__ == '__main__':
