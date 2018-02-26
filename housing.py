@@ -17,6 +17,8 @@ def main():
     fetch_housing_data(housing_url, housing_path)
     housing = load_housing_data(housing_path)
     strat_train_set, strat_test_set = split_train_test(housing, .2)
+    housing_predictors = strat_train_set.drop('median_house_value', axis=1)
+    housing_labels = strat_train_set['median_house_value'].copy()
 
 
 def fetch_housing_data(housing_url, housing_path):
