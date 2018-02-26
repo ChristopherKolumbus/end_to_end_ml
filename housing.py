@@ -57,5 +57,10 @@ def visualize_geographical_data(housing):
     plt.show()
 
 
+def calc_corr_matrix(housing):
+    corr_matrix = housing.corr()
+    print(corr_matrix['median_house_value'].sort_values(ascending=False))
+
+
 if __name__ == '__main__':
     main()
