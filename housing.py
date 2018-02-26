@@ -17,8 +17,6 @@ def main():
     fetch_housing_data(housing_url, housing_path)
     housing = load_housing_data(housing_path)
     strat_train_set, strat_test_set = split_train_test(housing, .2)
-    housing = strat_train_set.copy()
-    plot_scatter_matrix(housing)
 
 
 def fetch_housing_data(housing_url, housing_path):
@@ -51,6 +49,14 @@ def split_train_test(housing, test_ratio):
     return strat_train_set, strat_test_set
 
 
+def add_attributes(strat_train_set):
+    housing = strat_train_set.copy()
+    housing['rooms_per_household'] = housing['total_rooms'] / housing['households']
+    housing['bedrooms_per_rooms'] = housing['total_bedrooms'] / housing['total_rooms']
+    housing['population_per_household'] = housing['population'] / housing['households']
+    return housing
+
+
 def visualize_geographical_data(housing):
     housing.plot(kind='scatter', x='longitude', y='latitude', alpha=.4, s=housing['population'] / 100,
                  label='population',
@@ -65,7 +71,7 @@ def calc_corr_matrix(housing):
 
 
 def plot_scatter_matrix(housing):
-    attributes = ['median_house_value', 'median_income', 'total_rooms', 'housing_median_age']
+    attributes = ['median_house_value', 'median_income', 'total_rooms', 'bedrooms_per_rooms']
     scatter_matrix(housing[attributes], figsize=(12, 8))
     plt.show()
 
