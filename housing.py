@@ -53,7 +53,8 @@ def main():
     strat_train_set, strat_test_set = split_train_test(housing, .2)
     housing = strat_train_set.drop('median_house_value', axis=1)
     housing_labels = strat_train_set['median_house_value'].copy()
-    
+    housing_num = housing.drop('ocean_proximity', axis=1)
+    df_selector = DataFrameSelector(list(housing_num))
     #housing = replace_missing_values(housing)
     #housing = encode_text_labels(housing)
     #transformer = CustomTransformer()
