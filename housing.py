@@ -14,6 +14,17 @@ from sklearn.base import BaseEstimator
 from sklearn.base import TransformerMixin
 
 
+class DataFrameSelector(BaseEstimator, TransformerMixin):
+    def __init__(self, attribute_names):
+        self.attribute_names = attribute_names
+
+    def fit(self):
+        return self
+
+    def transform(self, X):
+        return X[self.attribute_names].values
+
+
 class CustomTransformer(BaseEstimator, TransformerMixin):
     def __init__(self, add_rooms_per_household=True, add_bedrooms_per_rooms=True, add_population_per_household=True):
         self.add_rooms_per_household = add_rooms_per_household
@@ -42,12 +53,13 @@ def main():
     strat_train_set, strat_test_set = split_train_test(housing, .2)
     housing = strat_train_set.drop('median_house_value', axis=1)
     housing_labels = strat_train_set['median_house_value'].copy()
-    housing = replace_missing_values(housing)
-    housing = encode_text_labels(housing)
-    transformer = CustomTransformer()
-    print(housing.head())
-    housing = transformer.transform(housing)
-    print(housing.head())
+    
+    #housing = replace_missing_values(housing)
+    #housing = encode_text_labels(housing)
+    #transformer = CustomTransformer()
+    #print(housing.head())
+    #housing = transformer.transform(housing)
+    #print(housing.head())
 
 
 def fetch_housing_data(housing_url, housing_path):
