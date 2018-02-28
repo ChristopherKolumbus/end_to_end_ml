@@ -17,6 +17,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.pipeline import FeatureUnion
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
+from sklearn.tree import DecisionTreeRegressor
 
 from preprocessing import CategoricalEncoder
 
@@ -88,7 +89,7 @@ def main():
     ])
     housing_prepared = full_pipeline.fit_transform(housing)
     # Select and train model:
-    linear_regression(housing_prepared, housing_labels)
+    tree_regression(housing_prepared, housing_labels)
 
 
 def fetch_housing_data(housing_url, housing_path):
@@ -175,6 +176,15 @@ def linear_regression(housing_prepared, housing_labels):
     lin_mse = mean_squared_error(housing_labels, housing_predictions)
     lin_rmse = np.sqrt(lin_mse)
     print(f'Linear regression RMSE: {lin_rmse}')
+
+
+def tree_regression(housing_prepared, housing_labels):
+    tree_reg = DecisionTreeRegressor()
+    tree_reg.fit(housing_prepared, housing_labels)
+    housing_predictions = tree_reg.predict(housing_prepared)
+    tree_mse = mean_squared_error(housing_predictions, housing_labels)
+    tree_rmse = np.sqrt(tree_mse)
+    print(f'Decision tree RMSE: {tree_rmse}')
 
 
 if __name__ == '__main__':
