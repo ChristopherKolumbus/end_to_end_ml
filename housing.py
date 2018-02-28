@@ -8,6 +8,7 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from pandas.plotting import scatter_matrix
 from sklearn.model_selection import StratifiedShuffleSplit
+from sklearn.model_selection import cross_val_score
 from sklearn.preprocessing import Imputer
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import LabelBinarizer
@@ -89,7 +90,11 @@ def main():
     ])
     housing_prepared = full_pipeline.fit_transform(housing)
     # Select and train model:
-    calc_model_rmse(housing_prepared, housing_labels, model='linear regression')
+    tree_reg = DecisionTreeRegressor()
+    scores = cross_val_score(tree_reg, housing_prepared, housing_labels, scoring='neg_mean_squared_error', cv=10)
+    tree_rmse_scores = np.sqrt(-scores)
+    display_scores(tree_rmse_scores)
+
 
 
 def fetch_housing_data(housing_url, housing_path):
@@ -197,6 +202,12 @@ def calc_model_rmse(housing_prepared, housing_labels, model='linear regression')
     selected_model_mse = mean_squared_error(housing_predictions, housing_labels)
     selected_model_rmse = np.sqrt(selected_model_mse)
     print(f'{model} RMSE: {selected_model_rmse}')
+
+
+def display_scores(scores):
+    print(f'Scores: {scores}')
+    print(f'Mean: {scores.mean()}')
+    print(f'Standard deviation: {scores.std()}')
 
 
 if __name__ == '__main__':
