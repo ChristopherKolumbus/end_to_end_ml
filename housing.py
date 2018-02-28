@@ -19,6 +19,7 @@ from sklearn.pipeline import FeatureUnion
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 from sklearn.tree import DecisionTreeRegressor
+from sklearn.ensemble import RandomForestRegressor
 
 from preprocessing import CategoricalEncoder
 
@@ -90,10 +91,11 @@ def main():
     ])
     housing_prepared = full_pipeline.fit_transform(housing)
     # Select and train model:
-    tree_reg = DecisionTreeRegressor()
-    scores = cross_val_score(tree_reg, housing_prepared, housing_labels, scoring='neg_mean_squared_error', cv=10)
-    tree_rmse_scores = np.sqrt(-scores)
-    display_scores(tree_rmse_scores)
+    forest_reg = RandomForestRegressor()
+    forest_scores = cross_val_score(forest_reg, housing_prepared, housing_labels,
+                                    scoring='neg_mean_squared_error', cv=10)
+    forest_rmse_scores = np.sqrt(-forest_scores)
+    display_scores(forest_rmse_scores)
 
 
 
@@ -197,6 +199,8 @@ def calc_model_rmse(housing_prepared, housing_labels, model='linear regression')
         selected_model = LinearRegression()
     elif model == 'decision tree regression':
         selected_model = DecisionTreeRegressor()
+    elif model == 'random forest regression':
+        selected_model = RandomForestRegressor()
     selected_model.fit(housing_prepared, housing_labels)
     housing_predictions = selected_model.predict(housing_prepared)
     selected_model_mse = mean_squared_error(housing_predictions, housing_labels)
