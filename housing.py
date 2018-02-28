@@ -5,15 +5,17 @@ import tarfile
 import requests
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import StratifiedShuffleSplit
 from matplotlib import pyplot as plt
 from pandas.plotting import scatter_matrix
+from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.preprocessing import Imputer
 from sklearn.preprocessing import StandardScaler
-from preprocessing import CategoricalEncoder
+from sklearn.preprocessing import LabelBinarizer
 from sklearn.base import BaseEstimator
 from sklearn.base import TransformerMixin
 from sklearn.pipeline import Pipeline
+
+from preprocessing import CategoricalEncoder
 
 
 class DataFrameSelector(BaseEstimator, TransformerMixin):
