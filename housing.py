@@ -88,12 +88,7 @@ def main():
     ])
     housing_prepared = full_pipeline.fit_transform(housing)
     # Select and train model:
-    lin_reg = LinearRegression()
-    lin_reg.fit(housing_prepared, housing_labels)
-    housing_predictions = lin_reg.predict(housing_prepared)
-    lin_mse = mean_squared_error(housing_labels, housing_predictions)
-    lin_rmse = np.sqrt(lin_mse)
-    print(lin_rmse)
+    linear_regression(housing_prepared, housing_labels)
 
 
 def fetch_housing_data(housing_url, housing_path):
@@ -171,6 +166,15 @@ def encode_text_labels(housing):
     housing_tr = housing.drop('ocean_proximity', axis=1)
     housing_tr = pd.concat([housing_tr, df], axis=1)
     return housing_tr
+
+
+def linear_regression(housing_prepared, housing_labels):
+    lin_reg = LinearRegression()
+    lin_reg.fit(housing_prepared, housing_labels)
+    housing_predictions = lin_reg.predict(housing_prepared)
+    lin_mse = mean_squared_error(housing_labels, housing_predictions)
+    lin_rmse = np.sqrt(lin_mse)
+    print(f'Linear regression RMSE: {lin_rmse}')
 
 
 if __name__ == '__main__':
