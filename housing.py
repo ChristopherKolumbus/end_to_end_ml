@@ -89,7 +89,7 @@ def main():
     ])
     housing_prepared = full_pipeline.fit_transform(housing)
     # Select and train model:
-    tree_regression(housing_prepared, housing_labels)
+    calc_model_rmse(housing_prepared, housing_labels, model='linear regression')
 
 
 def fetch_housing_data(housing_url, housing_path):
@@ -185,6 +185,18 @@ def tree_regression(housing_prepared, housing_labels):
     tree_mse = mean_squared_error(housing_predictions, housing_labels)
     tree_rmse = np.sqrt(tree_mse)
     print(f'Decision tree RMSE: {tree_rmse}')
+
+
+def calc_model_rmse(housing_prepared, housing_labels, model='linear regression'):
+    if model == 'linear regression':
+        selected_model = LinearRegression()
+    elif model == 'decision tree regression':
+        selected_model = DecisionTreeRegressor()
+    selected_model.fit(housing_prepared, housing_labels)
+    housing_predictions = selected_model.predict(housing_prepared)
+    selected_model_mse = mean_squared_error(housing_predictions, housing_labels)
+    selected_model_rmse = np.sqrt(selected_model_mse)
+    print(f'{model} RMSE: {selected_model_rmse}')
 
 
 if __name__ == '__main__':
