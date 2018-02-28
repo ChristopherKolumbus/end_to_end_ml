@@ -29,23 +29,30 @@ class DataFrameSelector(BaseEstimator, TransformerMixin):
         return X[self.attribute_names].values
 
 
-class CustomTransformer(BaseEstimator, TransformerMixin):
+rooms_ix, bedrooms_ix, population_ix, households_ix = 3, 4, 5, 6
+
+
+class CombinedAttributesAdder(BaseEstimator, TransformerMixin):
     def __init__(self, add_rooms_per_household=True, add_bedrooms_per_rooms=True, add_population_per_household=True):
         self.add_rooms_per_household = add_rooms_per_household
         self.add_bedrooms_per_rooms = add_bedrooms_per_rooms
         self.add_population_per_household = add_population_per_household
 
-    def fit(self):
+    def fit(self, X, y=None):
         return self
 
-    def transform(self, housing):
+    def transform(self, X, y=None):
         if self.add_rooms_per_household:
-            housing['rooms_per_household'] = housing['total_rooms'] / housing['households']
+            rooms_per_household = X[:, rooms_ix] / X[:, households_ix]
+            X = np.c_[X, rooms_per_household]
         if self.add_bedrooms_per_rooms:
-            housing['bedrooms_per_rooms'] = housing['total_bedrooms'] / housing['total_rooms']
+            bedrooms_per_room = X[:, bedrooms_ix] / X[:, rooms_ix]
+            X = np.c_[X, bedrooms_per_room]
         if self.add_population_per_household:
-            housing['population_per_household'] = housing['population'] / housing['households']
-        return housing
+            population_per_household = X[:, population_ix] / X[:, households_ix]
+            X = np.c_[X, population_per_household]
+        return X
+
 
 
 def main():
@@ -63,6 +70,7 @@ def main():
     num_pipeline = Pipeline([
         ('selector', DataFrameSelector(num_attributes)),
         ('imputer', Imputer(strategy='median')),
+        ('attribs_adder', CombinedAttributesAdder()),
         ('std_scaler', StandardScaler())
     ])
     cat_pipeline = Pipeline([
@@ -71,8 +79,7 @@ def main():
     ])
     housing_cat_tr = cat_pipeline.fit_transform(housing)
     housing_num_tr = num_pipeline.fit_transform(housing)
-    print(housing_cat_tr)
-    print(housing_num_tr)
+    print(list(housing))
 
 
 def fetch_housing_data(housing_url, housing_path):
