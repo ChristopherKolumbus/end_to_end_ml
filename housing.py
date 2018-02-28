@@ -57,11 +57,13 @@ class CombinedAttributesAdder(BaseEstimator, TransformerMixin):
 
 
 def main():
+    # Download and load housing data:
     download_root = "https://raw.githubusercontent.com/ageron/handson-ml/master/"
     housing_path = "datasets/housing"
     housing_url = download_root + housing_path + "/housing.tgz"
     fetch_housing_data(housing_url, housing_path)
     housing = load_housing_data(housing_path)
+    # Prepare data:
     strat_train_set, strat_test_set = split_train_test(housing, .2)
     housing = strat_train_set.drop('median_house_value', axis=1)
     housing_labels = strat_train_set['median_house_value'].copy()
