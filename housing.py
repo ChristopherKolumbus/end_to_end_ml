@@ -15,6 +15,7 @@ from sklearn.base import BaseEstimator
 from sklearn.base import TransformerMixin
 from sklearn.pipeline import Pipeline
 from sklearn.pipeline import FeatureUnion
+from sklearn.linear_model import LinearRegression
 
 from preprocessing import CategoricalEncoder
 
@@ -85,6 +86,14 @@ def main():
         ('cat_pipeline', cat_pipeline)
     ])
     housing_prepared = full_pipeline.fit_transform(housing)
+    # Select and train model:
+    lin_reg = LinearRegression()
+    lin_reg.fit(housing_prepared, housing_labels)
+    some_data = housing.iloc[:5]
+    some_labels = housing_labels.iloc[:5]
+    some_data_prepared = full_pipeline.transform(some_data)
+    print(f'Predictions: {lin_reg.predict(some_data_prepared)}')
+    print(f'Labels: {list(some_labels)}')
 
 
 def fetch_housing_data(housing_url, housing_path):
