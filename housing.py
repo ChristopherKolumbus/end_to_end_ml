@@ -14,6 +14,7 @@ from sklearn.preprocessing import LabelBinarizer
 from sklearn.base import BaseEstimator
 from sklearn.base import TransformerMixin
 from sklearn.pipeline import Pipeline
+from sklearn.pipeline import FeatureUnion
 
 from preprocessing import CategoricalEncoder
 
@@ -22,10 +23,10 @@ class DataFrameSelector(BaseEstimator, TransformerMixin):
     def __init__(self, attribute_names):
         self.attribute_names = attribute_names
 
-    def fit(self, X, y=None):
+    def fit(self, X):
         return self
 
-    def transform(self, X, y=None):
+    def transform(self, X):
         return X[self.attribute_names].values
 
 
@@ -38,10 +39,10 @@ class CombinedAttributesAdder(BaseEstimator, TransformerMixin):
         self.add_bedrooms_per_rooms = add_bedrooms_per_rooms
         self.add_population_per_household = add_population_per_household
 
-    def fit(self, X, y=None):
+    def fit(self, X):
         return self
 
-    def transform(self, X, y=None):
+    def transform(self, X):
         if self.add_rooms_per_household:
             rooms_per_household = X[:, rooms_ix] / X[:, households_ix]
             X = np.c_[X, rooms_per_household]
@@ -77,9 +78,11 @@ def main():
         ('selector', DataFrameSelector(cat_attributes)),
         ('cat_encoder', CategoricalEncoder(encoding='onehot-dense'))
     ])
-    housing_cat_tr = cat_pipeline.fit_transform(housing)
-    housing_num_tr = num_pipeline.fit_transform(housing)
-    print(list(housing))
+    full_pipeline = FeatureUnion(transformer_list=[
+        ('num_pipeline', num_pipeline),
+        ('cat_pipeline', cat_pipeline)
+    ])
+    housing_prepared = full_pipeline.fit_transform(housing)
 
 
 def fetch_housing_data(housing_url, housing_path):
