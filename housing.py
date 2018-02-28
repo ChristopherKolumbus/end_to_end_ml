@@ -9,19 +9,21 @@ from sklearn.model_selection import StratifiedShuffleSplit
 from matplotlib import pyplot as plt
 from pandas.plotting import scatter_matrix
 from sklearn.preprocessing import Imputer
-from sklearn.preprocessing import LabelBinarizer
+from sklearn.preprocessing import StandardScaler
+from preprocessing import CategoricalEncoder
 from sklearn.base import BaseEstimator
 from sklearn.base import TransformerMixin
+from sklearn.pipeline import Pipeline
 
 
 class DataFrameSelector(BaseEstimator, TransformerMixin):
     def __init__(self, attribute_names):
         self.attribute_names = attribute_names
 
-    def fit(self):
+    def fit(self, X, y=None):
         return self
 
-    def transform(self, X):
+    def transform(self, X, y=None):
         return X[self.attribute_names].values
 
 
@@ -53,14 +55,22 @@ def main():
     strat_train_set, strat_test_set = split_train_test(housing, .2)
     housing = strat_train_set.drop('median_house_value', axis=1)
     housing_labels = strat_train_set['median_house_value'].copy()
-    housing_num = housing.drop('ocean_proximity', axis=1)
-    df_selector = DataFrameSelector(list(housing_num))
-    #housing = replace_missing_values(housing)
-    #housing = encode_text_labels(housing)
-    #transformer = CustomTransformer()
-    #print(housing.head())
-    #housing = transformer.transform(housing)
-    #print(housing.head())
+    num_attributes = list(housing)
+    num_attributes.remove('ocean_proximity')
+    cat_attributes = ['ocean_proximity']
+    num_pipeline = Pipeline([
+        ('selector', DataFrameSelector(num_attributes)),
+        ('imputer', Imputer(strategy='median')),
+        ('std_scaler', StandardScaler())
+    ])
+    cat_pipeline = Pipeline([
+        ('selector', DataFrameSelector(cat_attributes)),
+        ('cat_encoder', CategoricalEncoder(encoding='onehot-dense'))
+    ])
+    housing_cat_tr = cat_pipeline.fit_transform(housing)
+    housing_num_tr = num_pipeline.fit_transform(housing)
+    print(housing_cat_tr)
+    print(housing_num_tr)
 
 
 def fetch_housing_data(housing_url, housing_path):
