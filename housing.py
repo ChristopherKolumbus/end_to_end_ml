@@ -9,6 +9,7 @@ from pandas.plotting import scatter_matrix
 from matplotlib import pyplot as plt
 from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import Imputer
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import LabelBinarizer
@@ -28,10 +29,10 @@ class DataFrameSelector(BaseEstimator, TransformerMixin):
     def __init__(self, attribute_names):
         self.attribute_names = attribute_names
 
-    def fit(self, X):
+    def fit(self, X, y=None):
         return self
 
-    def transform(self, X):
+    def transform(self, X, y=None):
         return X[self.attribute_names].values
 
 
@@ -44,10 +45,10 @@ class CombinedAttributesAdder(BaseEstimator, TransformerMixin):
         self.add_bedrooms_per_rooms = add_bedrooms_per_rooms
         self.add_population_per_household = add_population_per_household
 
-    def fit(self, X):
+    def fit(self, X, y=None):
         return self
 
-    def transform(self, X):
+    def transform(self, X, y=None):
         if self.add_rooms_per_household:
             rooms_per_household = X[:, rooms_ix] / X[:, households_ix]
             X = np.c_[X, rooms_per_household]
@@ -89,14 +90,24 @@ def main():
         ('num_pipeline', num_pipeline),
         ('cat_pipeline', cat_pipeline)
     ])
-    housing_prepared = full_pipeline.fit_transform(housing)
-    # Select and train model:
-    forest_reg = RandomForestRegressor()
-    forest_scores = cross_val_score(forest_reg, housing_prepared, housing_labels,
-                                    scoring='neg_mean_squared_error', cv=10)
-    forest_rmse_scores = np.sqrt(-forest_scores)
-    display_scores(forest_rmse_scores)
-
+    model = Pipeline([
+        ('feature_extraction', full_pipeline),
+        ('regression', RandomForestRegressor())
+    ])
+    param_grid = [
+        {'feature_extraction__num_pipeline__attribs_adder__add_rooms_per_household': [True, False],
+         'feature_extraction__num_pipeline__attribs_adder__add_bedrooms_per_rooms': [True, False],
+         'feature_extraction__num_pipeline__attribs_adder__add_population_per_household': [True, False],
+         'regression__bootstrap': [False],
+         'regression__n_estimators': [100],
+         'regression__max_features': [6]
+         }
+    ]
+    grid_search = GridSearchCV(model, param_grid, cv=2, scoring='neg_mean_squared_error')
+    grid_search.fit(housing, housing_labels)
+    cv_results = grid_search.cv_results_
+    for mean_score, params in zip(cv_results['mean_test_score'], cv_results['params']):
+        print(f'{np.sqrt(-mean_score)}, {params}')
 
 
 def fetch_housing_data(housing_url, housing_path):
