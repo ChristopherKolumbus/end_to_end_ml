@@ -1,4 +1,5 @@
 import numpy as np
+
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils import check_array
 from sklearn.preprocessing import LabelEncoder
@@ -47,20 +48,6 @@ class CategoricalEncoder(BaseEstimator, TransformerMixin):
         The categories of each feature determined during fitting. When
         categories were specified manually, this holds the sorted categories
         (in order corresponding with output of `transform`).
-    Examples
-    --------
-    Given a dataset with three features and two samples, we let the encoder
-    find the maximum value per feature and transform the data to a binary
-    one-hot encoding.
-    >>> from sklearn.preprocessing import CategoricalEncoder
-    >>> enc = CategoricalEncoder(handle_unknown='ignore')
-    >>> enc.fit([[0, 0, 3], [1, 1, 0], [0, 2, 1], [1, 0, 2]])
-    ... # doctest: +ELLIPSIS
-    CategoricalEncoder(categories='auto', dtype=<... 'numpy.float64'>,
-              encoding='onehot', handle_unknown='ignore')
-    >>> enc.transform([[0, 1, 1], [1, 0, 4]]).toarray()
-    array([[ 1.,  0.,  0.,  1.,  0.,  0.,  1.,  0.,  0.],
-           [ 0.,  1.,  1.,  0.,  0.,  0.,  0.,  0.,  0.]])
     See also
     --------
     sklearn.preprocessing.OneHotEncoder : performs a one-hot encoding of
