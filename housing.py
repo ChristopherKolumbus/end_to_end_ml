@@ -5,8 +5,8 @@ import tarfile
 import requests
 import numpy as np
 import pandas as pd
-from matplotlib import pyplot as plt
 from pandas.plotting import scatter_matrix
+from matplotlib import pyplot as plt
 from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.model_selection import cross_val_score
 from sklearn.preprocessing import Imputer
