@@ -8,7 +8,6 @@ import pandas as pd
 from pandas.plotting import scatter_matrix
 from matplotlib import pyplot as plt
 from sklearn.model_selection import StratifiedShuffleSplit
-from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import Imputer
 from sklearn.preprocessing import StandardScaler
@@ -102,16 +101,19 @@ def main():
     grid_search.fit(housing, housing_labels)
     cv_results = grid_search.cv_results_
     print_cv_results(cv_results)
+    final_model = grid_search.best_estimator_
+    feature_importances = final_model.named_steps['regression'].feature_importances_
+    extra_attribs = ['rooms_per_household', 'bedrooms_per_room', 'population_per_room']
+    feature_extraction_params = final_model.named_steps['feature_extraction'].get_params()
+    cat_one_hot_attribs = list(feature_extraction_params['cat_pipeline'].named_steps['cat_encoder'].categories_[0])
+    attribs = num_attributes + extra_attribs + cat_one_hot_attribs
+    print_feature_importances(feature_importances, attribs)
+
+
 
 
 
     '''
-    final_model = grid_search.best_estimator_
-    feature_importances = final_model.named_steps['regression'].feature_importances_
-    extra_attribs = ['rooms_per_household', 'bedrooms_per_room', 'population_per_room']
-    cat_one_hot_attribs = list(final_model.named_steps['feature_extraction'].get_params()['cat_pipeline'].named_steps['cat_encoder'].categories_[0])
-    attributes = num_attributes + extra_attribs + cat_one_hot_attribs
-    print(sorted(zip(feature_importances, attributes), reverse=True))
     X_test = strat_test_set.drop('median_house_value', axis=1)
     y_test = strat_test_set['median_house_value'].copy()
     X_test_prepared = final_model.named_steps['feature_extraction'].transform(X_test)
@@ -237,8 +239,16 @@ def display_scores(scores):
 
 
 def print_cv_results(cv_results):
+    print('Cross validation results:\n')
     for mean_score, params in zip(cv_results['mean_test_score'], cv_results['params']):
         print(f'Score: {np.sqrt(-mean_score)}, params: {params}')
+    print('\n')
+
+
+def print_feature_importances(feature_importances, attribs):
+    print('Feature importances:\n')
+    for feature_importance, attrib in sorted(zip(feature_importances, attribs), reverse=True):
+        print(f'{attrib:{len(max(attribs, key=len))}}: {feature_importance:6.4f} ')
     print('\n')
 
 
