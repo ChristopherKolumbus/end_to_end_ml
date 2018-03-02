@@ -106,9 +106,10 @@ def main():
     cv_results = grid_search.cv_results_
     for mean_score, params in zip(cv_results['mean_test_score'], cv_results['params']):
         print(f'{np.sqrt(-mean_score)}, {params}')
-    feature_importances = grid_search.best_estimator_.named_steps['regression'].feature_importances_
+    best_estimator = grid_search.best_estimator_
+    feature_importances = best_estimator.named_steps['regression'].feature_importances_
     extra_attribs = ['rooms_per_household', 'bedrooms_per_room', 'population_per_room']
-    cat_one_hot_attribs = list(grid_search.best_estimator_.named_steps['feature_extraction'].get_params()['cat_pipeline'].named_steps['cat_encoder'].categories_[0])
+    cat_one_hot_attribs = list(best_estimator.named_steps['feature_extraction'].get_params()['cat_pipeline'].named_steps['cat_encoder'].categories_[0])
     attributes = num_attributes + extra_attribs + cat_one_hot_attribs
     print(sorted(zip(feature_importances, attributes), reverse=True))
 
