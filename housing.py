@@ -76,22 +76,19 @@ def main():
     num_attributes = list(housing)
     num_attributes.remove('ocean_proximity')
     cat_attributes = ['ocean_proximity']
-    num_pipeline = Pipeline([
-        ('selector', DataFrameSelector(num_attributes)),
-        ('imputer', Imputer(strategy='median')),
-        ('attribs_adder', CombinedAttributesAdder()),
-        ('std_scaler', StandardScaler())
-    ])
-    cat_pipeline = Pipeline([
-        ('selector', DataFrameSelector(cat_attributes)),
-        ('cat_encoder', CategoricalEncoder(encoding='onehot-dense'))
-    ])
-    full_pipeline = FeatureUnion(transformer_list=[
-        ('num_pipeline', num_pipeline),
-        ('cat_pipeline', cat_pipeline)
-    ])
     model = Pipeline([
-        ('feature_extraction', full_pipeline),
+        ('feature_extraction', FeatureUnion(transformer_list=[
+            ('num_pipeline', Pipeline([
+                ('selector', DataFrameSelector(num_attributes)),
+                ('imputer', Imputer(strategy='median')),
+                ('attribs_adder', CombinedAttributesAdder()),
+                ('std_scalrer', StandardScaler())
+            ])),
+            ('cat_pipeline', Pipeline([
+                ('selector', DataFrameSelector(cat_attributes)),
+                ('cat_encoder', CategoricalEncoder(encoding='onehot-dense'))
+            ]))
+        ])),
         ('regression', RandomForestRegressor())
     ])
     param_grid = [
@@ -104,8 +101,11 @@ def main():
     grid_search = GridSearchCV(model, param_grid, cv=2, scoring='neg_mean_squared_error')
     grid_search.fit(housing, housing_labels)
     cv_results = grid_search.cv_results_
-    for mean_score, params in zip(cv_results['mean_test_score'], cv_results['params']):
-        print(f'{np.sqrt(-mean_score)}, {params}')
+    print_cv_results(cv_results)
+
+
+
+    '''
     final_model = grid_search.best_estimator_
     feature_importances = final_model.named_steps['regression'].feature_importances_
     extra_attribs = ['rooms_per_household', 'bedrooms_per_room', 'population_per_room']
@@ -118,7 +118,7 @@ def main():
     final_predictions = final_model.named_steps['regression'].predict(X_test_prepared)
     final_mse = mean_squared_error(y_test, final_predictions)
     final_rmse = np.sqrt(final_mse)
-    print(final_rmse)
+    print(final_rmse)'''
 
 
 def fetch_housing_data(housing_url, housing_path):
@@ -234,6 +234,12 @@ def display_scores(scores):
     print(f'Scores: {scores}')
     print(f'Mean: {scores.mean()}')
     print(f'Standard deviation: {scores.std()}')
+
+
+def print_cv_results(cv_results):
+    for mean_score, params in zip(cv_results['mean_test_score'], cv_results['params']):
+        print(f'Score: {np.sqrt(-mean_score)}, params: {params}')
+    print('\n')
 
 
 if __name__ == '__main__':
