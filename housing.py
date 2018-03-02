@@ -106,12 +106,19 @@ def main():
     cv_results = grid_search.cv_results_
     for mean_score, params in zip(cv_results['mean_test_score'], cv_results['params']):
         print(f'{np.sqrt(-mean_score)}, {params}')
-    best_estimator = grid_search.best_estimator_
-    feature_importances = best_estimator.named_steps['regression'].feature_importances_
+    final_model = grid_search.best_estimator_
+    feature_importances = final_model.named_steps['regression'].feature_importances_
     extra_attribs = ['rooms_per_household', 'bedrooms_per_room', 'population_per_room']
-    cat_one_hot_attribs = list(best_estimator.named_steps['feature_extraction'].get_params()['cat_pipeline'].named_steps['cat_encoder'].categories_[0])
+    cat_one_hot_attribs = list(final_model.named_steps['feature_extraction'].get_params()['cat_pipeline'].named_steps['cat_encoder'].categories_[0])
     attributes = num_attributes + extra_attribs + cat_one_hot_attribs
     print(sorted(zip(feature_importances, attributes), reverse=True))
+    X_test = strat_test_set.drop('median_house_value', axis=1)
+    y_test = strat_test_set['median_house_value'].copy()
+    X_test_prepared = final_model.named_steps['feature_extraction'].transform(X_test)
+    final_predictions = final_model.named_steps['regression'].predict(X_test_prepared)
+    final_mse = mean_squared_error(y_test, final_predictions)
+    final_rmse = np.sqrt(final_mse)
+    print(final_rmse)
 
 
 def fetch_housing_data(housing_url, housing_path):
