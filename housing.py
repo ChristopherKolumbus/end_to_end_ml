@@ -60,7 +60,6 @@ class CombinedAttributesAdder(BaseEstimator, TransformerMixin):
         return X
 
 
-
 def main():
     # Download and load housing data:
     download_root = "https://raw.githubusercontent.com/ageron/handson-ml/master/"
@@ -108,19 +107,7 @@ def main():
     cat_one_hot_attribs = list(feature_extraction_params['cat_pipeline'].named_steps['cat_encoder'].categories_[0])
     attribs = num_attributes + extra_attribs + cat_one_hot_attribs
     print_feature_importances(feature_importances, attribs)
-
-
-
-
-
-    '''
-    X_test = strat_test_set.drop('median_house_value', axis=1)
-    y_test = strat_test_set['median_house_value'].copy()
-    X_test_prepared = final_model.named_steps['feature_extraction'].transform(X_test)
-    final_predictions = final_model.named_steps['regression'].predict(X_test_prepared)
-    final_mse = mean_squared_error(y_test, final_predictions)
-    final_rmse = np.sqrt(final_mse)
-    print(final_rmse)'''
+    evaluate_test_set(final_model, strat_test_set)
 
 
 def fetch_housing_data(housing_url, housing_path):
@@ -250,6 +237,16 @@ def print_feature_importances(feature_importances, attribs):
     for feature_importance, attrib in sorted(zip(feature_importances, attribs), reverse=True):
         print(f'{attrib:{len(max(attribs, key=len))}}: {feature_importance:6.4f} ')
     print('\n')
+
+
+def evaluate_test_set(model, test_set):
+    X_test = test_set.drop('median_house_value', axis=1)
+    y_test = test_set['median_house_value'].copy()
+    X_test_prepared = model.named_steps['feature_extraction'].transform(X_test)
+    final_predictions = model.named_steps['regression'].predict(X_test_prepared)
+    final_mse = mean_squared_error(y_test, final_predictions)
+    final_rmse = np.sqrt(final_mse)
+    print(f'Final RMSE: {final_rmse:6.4f}\n')
 
 
 if __name__ == '__main__':
