@@ -60,6 +60,11 @@ class CombinedAttributesAdder(BaseEstimator, TransformerMixin):
         return X
 
 
+class AttributesDropper(BaseEstimator, TransformerMixin):
+    def __init__(self):
+        pass
+
+
 def main():
     # Download and load housing data:
     download_root = "https://raw.githubusercontent.com/ageron/handson-ml/master/"
@@ -96,17 +101,8 @@ def main():
          'regression__max_features': [6]
          }
     ]
-    grid_search = GridSearchCV(model, param_grid, cv=2, scoring='neg_mean_squared_error')
-    grid_search.fit(housing, housing_labels)
-    cv_results = grid_search.cv_results_
-    print_cv_results(cv_results)
-    final_model = grid_search.best_estimator_
-    feature_importances = final_model.named_steps['regression'].feature_importances_
-    extra_attribs = ['rooms_per_household', 'bedrooms_per_room', 'population_per_room']
-    feature_extraction_params = final_model.named_steps['feature_extraction'].get_params()
-    cat_one_hot_attribs = list(feature_extraction_params['cat_pipeline'].named_steps['cat_encoder'].categories_[0])
-    attribs = num_attributes + extra_attribs + cat_one_hot_attribs
-    print_feature_importances(feature_importances, attribs)
+    final_model = grid_search(model, param_grid, housing, housing_labels)
+    print_feature_importances(final_model, num_attributes)
     evaluate_test_set(final_model, strat_test_set)
 
 
@@ -232,7 +228,12 @@ def print_cv_results(cv_results):
     print('\n')
 
 
-def print_feature_importances(feature_importances, attribs):
+def print_feature_importances(final_model, num_attributes):
+    feature_importances = final_model.named_steps['regression'].feature_importances_
+    extra_attribs = ['rooms_per_household', 'bedrooms_per_room', 'population_per_room']
+    feature_extraction_params = final_model.named_steps['feature_extraction'].get_params()
+    cat_one_hot_attribs = list(feature_extraction_params['cat_pipeline'].named_steps['cat_encoder'].categories_[0])
+    attribs = num_attributes + extra_attribs + cat_one_hot_attribs
     print('Feature importances:\n')
     for feature_importance, attrib in sorted(zip(feature_importances, attribs), reverse=True):
         print(f'{attrib:{len(max(attribs, key=len))}}: {feature_importance:6.4f} ')
@@ -247,6 +248,15 @@ def evaluate_test_set(model, test_set):
     final_mse = mean_squared_error(y_test, final_predictions)
     final_rmse = np.sqrt(final_mse)
     print(f'Final RMSE: {final_rmse:6.4f}\n')
+
+
+def grid_search(model, param_grid, X_train, y_train, cv=10, scoring='neg_mean_squared_error'):
+    grid_search = GridSearchCV(model, param_grid, cv, scoring)
+    grid_search.fit(X_train, y_train)
+    cv_results = grid_search.cv_results_
+    print_cv_results(cv_results)
+    final_model = grid_search.best_estimator_
+    return final_model
 
 
 if __name__ == '__main__':
