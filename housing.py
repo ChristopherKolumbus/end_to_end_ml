@@ -20,6 +20,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.svm import SVR
 
 from preprocessing import CategoricalEncoder
 
@@ -60,11 +61,6 @@ class CombinedAttributesAdder(BaseEstimator, TransformerMixin):
         return X
 
 
-class AttributesDropper(BaseEstimator, TransformerMixin):
-    def __init__(self):
-        pass
-
-
 def main():
     # Download and load housing data:
     download_root = "https://raw.githubusercontent.com/ageron/handson-ml/master/"
@@ -92,16 +88,13 @@ def main():
                 ('cat_encoder', CategoricalEncoder(encoding='onehot-dense'))
             ]))
         ])),
-        ('regression', RandomForestRegressor())
+        ('regression', SVR())
     ])
     param_grid = [
-        {
-         'regression__bootstrap': [False],
-         'regression__n_estimators': [100],
-         'regression__max_features': [6]
-         }
+        {'regression__kernel': ['linear'], 'regression__C': [10., 30., 100.]},
+        {'regression__kernel': ['rbf'], 'regression__C': [10., 30., 100.], 'regression__gamma': [0.01, 0.03, 0.1]}
     ]
-    final_model = grid_search(model, param_grid, housing, housing_labels)
+    final_model = grid_search_cv(model, param_grid, housing, housing_labels)
     print_feature_importances(final_model, num_attributes)
     evaluate_test_set(final_model, strat_test_set)
 
@@ -250,7 +243,7 @@ def evaluate_test_set(model, test_set):
     print(f'Final RMSE: {final_rmse:6.4f}\n')
 
 
-def grid_search(model, param_grid, X_train, y_train, cv=10, scoring='neg_mean_squared_error'):
+def grid_search_cv(model, param_grid, X_train, y_train, cv=10, scoring='neg_mean_squared_error'):
     grid_search = GridSearchCV(model, param_grid, cv, scoring)
     grid_search.fit(X_train, y_train)
     cv_results = grid_search.cv_results_
