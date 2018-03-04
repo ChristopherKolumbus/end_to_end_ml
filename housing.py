@@ -25,6 +25,7 @@ from sklearn.svm import SVR
 from preprocessing import CategoricalEncoder
 
 
+# noinspection PyUnusedLocal,PyPep8Naming
 class DataFrameSelector(BaseEstimator, TransformerMixin):
     def __init__(self, attribute_names):
         self.attribute_names = attribute_names
@@ -39,6 +40,7 @@ class DataFrameSelector(BaseEstimator, TransformerMixin):
 rooms_ix, bedrooms_ix, population_ix, households_ix = 3, 4, 5, 6
 
 
+# noinspection PyUnusedLocal,PyPep8Naming
 class CombinedAttributesAdder(BaseEstimator, TransformerMixin):
     def __init__(self, add_rooms_per_household=True, add_bedrooms_per_rooms=True, add_population_per_household=True):
         self.add_rooms_per_household = add_rooms_per_household
@@ -156,6 +158,7 @@ def plot_scatter_matrix(housing):
     plt.show()
 
 
+# noinspection PyPep8Naming
 def replace_missing_values(housing):
     imputer = Imputer(strategy='median')
     housing_num = housing.drop('ocean_proximity', axis=1)
@@ -179,7 +182,7 @@ def encode_text_labels(housing):
 def linear_regression(housing_prepared, housing_labels):
     lin_reg = LinearRegression()
     lin_reg.fit(housing_prepared, housing_labels)
-    housing_predictions = lin_reg.predict(housing_prepared)
+    housing_predictions = lin_reg.predict(X=housing_prepared)
     lin_mse = mean_squared_error(housing_labels, housing_predictions)
     lin_rmse = np.sqrt(lin_mse)
     print(f'Linear regression RMSE: {lin_rmse}')
@@ -201,6 +204,8 @@ def calc_model_rmse(housing_prepared, housing_labels, model='linear regression')
         selected_model = DecisionTreeRegressor()
     elif model == 'random forest regression':
         selected_model = RandomForestRegressor()
+    else:
+        raise ValueError('incorrect model')
     selected_model.fit(housing_prepared, housing_labels)
     housing_predictions = selected_model.predict(housing_prepared)
     selected_model_mse = mean_squared_error(housing_predictions, housing_labels)
@@ -233,6 +238,7 @@ def print_feature_importances(final_model, num_attributes):
     print('\n')
 
 
+# noinspection PyPep8Naming
 def evaluate_test_set(model, test_set):
     X_test = test_set.drop('median_house_value', axis=1)
     y_test = test_set['median_house_value'].copy()
@@ -243,6 +249,7 @@ def evaluate_test_set(model, test_set):
     print(f'Final RMSE: {final_rmse:6.4f}\n')
 
 
+# noinspection PyPep8Naming
 def grid_search_cv(model, param_grid, X_train, y_train, cv=10, scoring='neg_mean_squared_error'):
     grid_search = GridSearchCV(model, param_grid, cv, scoring)
     grid_search.fit(X_train, y_train)
